@@ -29,7 +29,7 @@ const els = {
 };
 
 async function loadCards() {
-  const response = await fetch("./cards.json");
+  const response = await fetch("./cards.json?v=20260531-2");
   state.cards = await response.json();
   applyFilter();
 }
@@ -96,7 +96,7 @@ function applyFilter() {
       card.section,
       card.title,
       card.question,
-      card.hints.join(" "),
+      (card.hints || []).join(" "),
       card.answer
     ].join(" ").toLowerCase();
     const modeOk = state.mode === "all" || state.weak.has(card.id);
@@ -144,8 +144,8 @@ function renderCard() {
   els.sectionLabel.textContent = card.section;
   els.cardTitle.textContent = card.title;
   els.questionText.textContent = card.question;
-  els.hint1.textContent = card.hints[0] || "";
-  els.hint2.textContent = card.hints[1] || "";
+  els.hint1.textContent = (card.hints || [])[0] || "";
+  els.hint2.textContent = (card.hints || [])[1] || "";
   els.answer.textContent = card.answer;
   els.weakButton.textContent = state.weak.has(card.id) ? "★" : "☆";
   els.weakButton.classList.toggle("is-weak", state.weak.has(card.id));
