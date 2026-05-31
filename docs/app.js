@@ -25,12 +25,7 @@ const els = {
   answerButton: document.querySelector("#answerButton"),
   prevButton: document.querySelector("#prevButton"),
   nextButton: document.querySelector("#nextButton"),
-  weakButton: document.querySelector("#weakButton"),
-  sourceImage: document.querySelector("#sourceImage"),
-  zoomButton: document.querySelector("#zoomButton"),
-  imageDialog: document.querySelector("#imageDialog"),
-  dialogImage: document.querySelector("#dialogImage"),
-  closeDialog: document.querySelector("#closeDialog")
+  weakButton: document.querySelector("#weakButton")
 };
 
 async function loadCards() {
@@ -152,8 +147,6 @@ function renderCard() {
   els.hint1.textContent = card.hints[0] || "";
   els.hint2.textContent = card.hints[1] || "";
   els.answer.textContent = card.answer;
-  els.sourceImage.src = card.sourceImage;
-  els.dialogImage.src = card.sourceImage;
   els.weakButton.textContent = state.weak.has(card.id) ? "★" : "☆";
   els.weakButton.classList.toggle("is-weak", state.weak.has(card.id));
   [els.hint1, els.hint2, els.answer].forEach(el => el.hidden = true);
@@ -213,7 +206,4 @@ document.querySelectorAll(".self-check button").forEach(button => {
     move(1);
   });
 });
-els.zoomButton.addEventListener("click", () => els.imageDialog.showModal());
-els.closeDialog.addEventListener("click", () => els.imageDialog.close());
-
 loadCards();
