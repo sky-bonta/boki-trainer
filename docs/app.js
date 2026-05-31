@@ -99,7 +99,15 @@ function applyFilter() {
       (card.hints || []).join(" "),
       card.answer
     ].join(" ").toLowerCase();
-    const modeOk = state.mode === "all" || state.weak.has(card.id);
+    const isPattern = card.section.startsWith("型カード");
+    const isDrill = card.section.startsWith("超基礎");
+    const isWorkbook = !isPattern && !isDrill;
+    const modeOk =
+      state.mode === "all" ||
+      (state.mode === "weak" && state.weak.has(card.id)) ||
+      (state.mode === "pattern" && isPattern) ||
+      (state.mode === "drill" && isDrill) ||
+      (state.mode === "workbook" && isWorkbook);
     return modeOk && (!query || haystack.includes(query));
   });
   state.index = Math.min(state.index, Math.max(state.filtered.length - 1, 0));
