@@ -1,7 +1,7 @@
 const state = {
   cards: [],
   filtered: [],
-  index: 0,
+  index: Number(localStorage.getItem("bokiLastIndex") || "0"),
   mode: "all",
   weak: new Set(JSON.parse(localStorage.getItem("bokiWeakCards") || "[]")),
   grades: JSON.parse(localStorage.getItem("bokiGrades") || "{}")
@@ -12,6 +12,8 @@ const els = {
   weakCount: document.querySelector("#weakCount"),
   cardList: document.querySelector("#cardList"),
   searchInput: document.querySelector("#searchInput"),
+  exportButton: document.querySelector("#exportButton"),
+  importInput: document.querySelector("#importInput"),
   sectionLabel: document.querySelector("#sectionLabel"),
   cardTitle: document.querySelector("#cardTitle"),
   questionText: document.querySelector("#questionText"),
@@ -32,7 +34,7 @@ const els = {
 };
 
 async function loadCards() {
-  const response = await fetch("cards.json");
+  const response = await fetch("./cards.json");
   state.cards = await response.json();
   applyFilter();
 }
@@ -40,6 +42,56 @@ async function loadCards() {
 function saveProgress() {
   localStorage.setItem("bokiWeakCards", JSON.stringify([...state.weak]));
   localStorage.setItem("bokiGrades", JSON.stringify(state.grades));
+  localStorage.setItem("bokiLastIndex", String(state.index));
+}
+
+function progressPayload() {
+  return {
+    app: "boki-trainer",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    lastIndex: state.index,
+    weak: [...state.weak],
+    grades: state.grades
+  };
+}
+
+function exportProgress() {
+  const blob = new Blob([JSON.stringify(progressPayload(), null, 2)], {
+    type: "application/json"
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  const date = new Date().toISOString().slice(0, 10);
+  link.href = url;
+  link.download = `boki-trainer-progress-${date}.json`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+function importProgress(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.addEventListener("load", () => {
+    try {
+      const data = JSON.parse(String(reader.result || "{}"));
+      if (data.app !== "boki-trainer" || !Array.isArray(data.weak) || typeof data.grades !== "object") {
+        throw new Error("invalid progress file");
+      }
+      state.weak = new Set(data.weak);
+      state.grades = data.grades || {};
+      state.index = Number.isInteger(data.lastIndex) ? data.lastIndex : 0;
+      saveProgress();
+      applyFilter();
+    } catch {
+      alert("進捗ファイルを読み込めませんでした。");
+    } finally {
+      els.importInput.value = "";
+    }
+  });
+  reader.readAsText(file);
 }
 
 function applyFilter() {
@@ -69,9 +121,11 @@ function renderList() {
   state.filtered.forEach((card, index) => {
     const button = document.createElement("button");
     button.className = `list-item${index === state.index ? " is-active" : ""}`;
+    if (state.grades[card.id]) button.dataset.grade = state.grades[card.id];
     button.innerHTML = `<strong>${card.title}</strong><small>${card.section}${state.weak.has(card.id) ? " / 苦手" : ""}</small>`;
     button.addEventListener("click", () => {
       state.index = index;
+      saveProgress();
       renderList();
       renderCard();
     });
@@ -112,6 +166,7 @@ function reveal(el) {
 function move(delta) {
   if (!state.filtered.length) return;
   state.index = (state.index + delta + state.filtered.length) % state.filtered.length;
+  saveProgress();
   renderList();
   renderCard();
 }
@@ -128,8 +183,11 @@ document.querySelectorAll(".mode").forEach(button => {
 
 els.searchInput.addEventListener("input", () => {
   state.index = 0;
+  saveProgress();
   applyFilter();
 });
+els.exportButton.addEventListener("click", exportProgress);
+els.importInput.addEventListener("change", event => importProgress(event.target.files[0]));
 els.hint1Button.addEventListener("click", () => reveal(els.hint1));
 els.hint2Button.addEventListener("click", () => reveal(els.hint2));
 els.answerButton.addEventListener("click", () => reveal(els.answer));

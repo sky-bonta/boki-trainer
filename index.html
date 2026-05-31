@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>簿記トレーナー</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="./style.css">
 </head>
 <body>
   <header class="topbar">
@@ -28,6 +28,13 @@
         <span>検索</span>
         <input id="searchInput" type="search" placeholder="第6問、利息、法人税など">
       </label>
+      <div class="progress-tools">
+        <button id="exportButton">進捗を書き出し</button>
+        <label class="import-button">
+          進捗を読み込み
+          <input id="importInput" type="file" accept="application/json,.json">
+        </label>
+      </div>
       <nav id="cardList" class="card-list" aria-label="カード一覧"></nav>
     </aside>
 
@@ -81,6 +88,6 @@
     <img id="dialogImage" alt="拡大した問題紙面">
   </dialog>
 
-  <script src="app.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>

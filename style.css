@@ -136,6 +136,28 @@ h1 {
   padding: 9px 10px;
 }
 
+.progress-tools {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.progress-tools button,
+.import-button {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--ink);
+  padding: 9px 10px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.import-button input {
+  display: none;
+}
+
 .card-list {
   display: grid;
   gap: 7px;
@@ -154,6 +176,18 @@ h1 {
 
 .list-item small {
   color: var(--muted);
+}
+
+.list-item[data-grade="good"] {
+  border-left: 4px solid var(--accent);
+}
+
+.list-item[data-grade="almost"] {
+  border-left: 4px solid #c08a18;
+}
+
+.list-item[data-grade="again"] {
+  border-left: 4px solid var(--warn);
 }
 
 .trainer {
